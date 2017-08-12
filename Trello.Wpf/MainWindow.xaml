@@ -1,0 +1,239 @@
+﻿<Window x:Class="Trello.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:dat="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
+        xmlns:converters="clr-namespace:Trello.Wpf.Converters"
+        xmlns:utility="clr-namespace:Trello.Wpf.Utility"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Closing="Window_Closing"
+        Title="Trello" FontSize="14">
+    <Window.Resources>
+        <converters:GroupKeyToTitleConverter x:Key="GroupKeyToTitleConverter"/>
+        <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+        <CollectionViewSource Source="{Binding MainWindowViewModel.Cards}" x:Key="CardsGrouped">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="GroupKey" Direction="Ascending"/>
+                <scm:SortDescription PropertyName="CreationDate" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+            <CollectionViewSource.GroupDescriptions>
+                <dat:PropertyGroupDescription PropertyName="GroupKey"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock TextDecorations="Underline" Margin="6,4,10,4">
+                            <ContentPresenter />
+                        </TextBlock>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="#fff" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground" Value="#6aaf6a" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#333">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Click="ExportToExcel_OnClick" Style="{StaticResource LinkButton}">To Excel</Button>
+                <Button Grid.Column="1" Click="Refresh_OnClick" Style="{StaticResource LinkButton}">Refresh</Button>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Label Foreground="#fff">Hi, </Label>
+                    <Label Foreground="#fff">
+                        <Run Text="{Binding MainWindowViewModel.TrelloFullName, Mode=OneWay}"/>
+                    </Label>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Groups & Filters-->
+        <Border Grid.Row="1" Background="#bbb">
+            <Expander Margin="6" Header="Group By &amp; Filters" IsExpanded="False">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="6,6,50,6">
+                        <Label>Group By</Label>
+                        <CheckBox IsChecked="{Binding MainWindowViewModel.GroupByList}" Click="FilterCards_OnClick">List</CheckBox>
+                        <CheckBox IsChecked="{Binding MainWindowViewModel.GroupByMember}" Click="FilterCards_OnClick">Member</CheckBox>
+                        <CheckBox IsChecked="{Binding MainWindowViewModel.GroupByPriority}" Click="FilterCards_OnClick">Priority</CheckBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="6">
+                        <Label>Filters</Label>
+                        <StackPanel Margin="6,0" Orientation="Horizontal">
+                            <StackPanel Margin="0,0,10,0">
+                                <Label>Lists</Label>
+                                <ItemsControl ItemsSource="{Binding MainWindowViewModel.ListFilters}" Margin="6,0,10,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected}" Click="FilterCards_OnClick">
+                                                <Run Text="{Binding FilterName, Mode=OneWay}"/>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,0">
+                                <Label>Members</Label>
+                                <ItemsControl ItemsSource="{Binding MainWindowViewModel.MemberFilters}" Margin="6,0,10,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected}" Click="FilterCards_OnClick">
+                                                <Run Text="{Binding FilterName, Mode=OneWay}"/>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,0">
+                                <Label>Priorities</Label>
+                                <ItemsControl ItemsSource="{Binding MainWindowViewModel.PriorityFilters}" Margin="6,0,10,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected}" Click="FilterCards_OnClick">
+                                                <Run Text="{Binding FilterName, Mode=OneWay}"/>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,0">
+                                <Label>Statuses</Label>
+                                <ItemsControl ItemsSource="{Binding MainWindowViewModel.StatusFilters}" Margin="6,0,10,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected}" Click="FilterCards_OnClick">
+                                                <Run Text="{Binding FilterName, Mode=OneWay}"/>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Expander>
+        </Border>
+        <!-- Body -->
+        <ListView Grid.Row="2"
+            ItemsSource="{Binding Source={StaticResource CardsGrouped}}"
+            IsSynchronizedWithCurrentItem="True"
+            utility:GridViewSort.AutoSort="True">
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn Header="Priority" DisplayMemberBinding="{Binding Priority}" Width="Auto"
+                        utility:GridViewSort.PropertyName="Priority">
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Padding="0,0,15,0"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Title" Width="700"
+                        utility:GridViewSort.PropertyName="Title">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding Title}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Created" DisplayMemberBinding="{Binding CreationDate, StringFormat='{}{0:MM/dd/yy}'}"  Width="Auto" utility:GridViewSort.PropertyName="CreationDate">
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Padding="0,0,15,0"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="List" DisplayMemberBinding="{Binding List}" Width="Auto" utility:GridViewSort.PropertyName="List">
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Padding="0,0,15,0"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Mine" Width="50"
+                        utility:GridViewSort.PropertyName="AssignedToMe">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding AssignedToMe, Converter={StaticResource BoolToStringConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Url" Width="Auto" utility:GridViewSort.PropertyName="Url">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="{Binding Url, Mode=OneWay}" RequestNavigate="Hyperlink_Navigate">
+                                        <Run Text="{Binding Url, Mode=OneWay}"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Assigned To" Width="Auto"
+                        utility:GridViewSort.PropertyName="AssignedTo">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding AssignedTo}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <StackPanel Margin="0,10,0,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name, Converter={StaticResource GroupKeyToTitleConverter}}" FontWeight="Bold" />
+                                                <TextBlock Text="{Binding ItemCount, StringFormat={} ({0})}" />
+                                            </StackPanel>
+                                            <ItemsPresenter />
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
+            <ListView.Style>
+                <Style TargetType="{x:Type ListView}">
+                    <Setter Property="ItemContainerStyle">
+                        <Setter.Value>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="VerticalContentAlignment" Value="Top"/>
+                            </Style>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Style>
+        </ListView>
+    </Grid>
+</Window>
