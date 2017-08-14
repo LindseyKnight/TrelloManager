@@ -7,7 +7,8 @@
         xmlns:utility="clr-namespace:Trello.Wpf.Utility"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Closing="Window_Closing"
-        Title="Trello" FontSize="14">
+        Icon="trello.ico"
+        Title="Trello Manager" FontSize="14">
     <Window.Resources>
         <converters:GroupKeyToTitleConverter x:Key="GroupKeyToTitleConverter"/>
         <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
